@@ -1,0 +1,132 @@
+{
+	"MediaKind": {
+		"Music": 1,
+		"Movie": 2,
+		"Podcast": 4,
+		"Audiobook": 8,
+		"MusicVideo": 32,
+		"TVShow": 64,
+		"HomeVideo": 1024,
+		"ITunesExtras": 65536,
+		"VoiceMemo": 1048576,
+		"ITunesU": 2097152,
+		"Book": 12582912,
+		"BookOrAudiobook": 12582920,
+		"OtherMusic": 1057201,
+		"UndesiredMusic": 2129924,
+		"UndesiredOther": 2138116
+	},
+	"ICloudStatus": {
+		"Purchased": 1,
+		"Matched": 2,
+		"Uploaded": 3,
+		"Ineligible": 4,
+		"LocalOnly": 5,
+		"Duplicate": 6
+	},
+	"LoveStatus": {
+		"None": 0,
+		"Loved": 2,
+		"Disliked": 3
+	},
+    "LocationStatus": {
+        "Computer": 1,
+        "iCloud": 16
+    },
+	"Conjunction": {
+		"AND": 0,
+		"OR": 1
+	},
+	"LimitMethod": {
+		"minutes": 1,
+		"MB": 2,
+		"items": 3,
+		"hours": 4,
+		"GB": 5
+	},
+	"SelectionMethod": {
+		"<random>": 2,
+		"name": 5,
+		"album": 6,
+		"artist": 7,
+		"genre": 9,
+		"rating": 28,
+		"lowest_rating": 1,
+		"play_date_utc": 26,
+		"play_count": 25,
+		"date_added": 21
+	},
+	"Field": {
+		"album": 3,
+		"album_artist": 71,
+		"artist": 4,
+		"category": 55,
+		"comments": 14,
+		"composer": 18,
+		"description": 54,
+		"genre": 8,
+		"grouping": 39,
+		"kind": 9,
+		"name": 2,
+		"series": 62,
+		"sort_album": 79,
+		"sort_album_artist": 81,
+		"sort_composer": 82,
+		"sort_name": 78,
+		"sort_series": 83,
+		"video_rating": 89,
+
+		"bpm": 35,
+		"bit_rate": 5,
+		"compilation": 31,
+		"disk_number": 24,
+		"play_count": 22,
+		"rating": 25,
+        "album_rating": 90,
+		"podcast": 57,
+		"sample_rate": 6,
+		"season": 63,
+		"size": 12,
+		"skip_count": 68,
+		"total_time": 13,
+		"track_number": 11,
+		"year": 7,
+
+		"has_artwork": 37,
+		"purchased": 41,
+		"disabled": 29,
+
+		"date_added": 16,
+		"date_modified": 10,
+		"play_date_utc": 23,
+		"skip_date": 69,
+
+		"media_kind": 60,
+
+		"playlist_persistent_id": 40,
+
+		"love": 154,
+
+		"icloud_status": 134,
+
+		"location": 133
+	},
+	"LogicSign": {
+		"int_pos": 0,
+		"str_pos": 1,
+		"int_neg": 2,
+		"str_neg": 3
+	},
+	"LogicRule": {
+		"other": 0,
+		"is": 1,
+		"contains": 2,
+		"startswith": 4,
+		"endswith": 8,
+		"greaterthan": 16,
+		"lessthan": 64,
+		"between": 256,
+        "within": 512
+	}
+}
+
