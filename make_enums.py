@@ -33,7 +33,7 @@ def make_enum(name, values):
     out += 'func (e %s) MarshalJSON() ([]byte, error) {\n' % name
     out += '\treturn json.Marshal(e.String())\n'
     out += '}\n\n'
-    out += 'func (e %s) UnmarshalJSON(data []byte) error {\n' % name
+    out += 'func (e *%s) UnmarshalJSON(data []byte) error {\n' % name
     out += '\tvar s string\n'
     out += '\terr := json.Unmarshal(data, &s)\n'
     out += '\tif err != nil {\n'

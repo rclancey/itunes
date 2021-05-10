@@ -33,7 +33,7 @@ func (e Conjunction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e Conjunction) UnmarshalJSON(data []byte) error {
+func (e *Conjunction) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -204,7 +204,7 @@ func (e Field) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e Field) UnmarshalJSON(data []byte) error {
+func (e *Field) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -258,7 +258,7 @@ func (e ICloudStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e ICloudStatus) UnmarshalJSON(data []byte) error {
+func (e *ICloudStatus) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -309,7 +309,7 @@ func (e LimitMethod) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e LimitMethod) UnmarshalJSON(data []byte) error {
+func (e *LimitMethod) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -351,7 +351,7 @@ func (e LocationStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e LocationStatus) UnmarshalJSON(data []byte) error {
+func (e *LocationStatus) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -414,7 +414,7 @@ func (e LogicRule) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e LogicRule) UnmarshalJSON(data []byte) error {
+func (e *LogicRule) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -462,7 +462,7 @@ func (e LogicSign) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e LogicSign) UnmarshalJSON(data []byte) error {
+func (e *LogicSign) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -507,7 +507,7 @@ func (e LoveStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e LoveStatus) UnmarshalJSON(data []byte) error {
+func (e *LoveStatus) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -588,7 +588,7 @@ func (e MediaKind) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e MediaKind) UnmarshalJSON(data []byte) error {
+func (e *MediaKind) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -654,7 +654,7 @@ func (e SelectionMethod) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-func (e SelectionMethod) UnmarshalJSON(data []byte) error {
+func (e *SelectionMethod) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
 	if err != nil {
