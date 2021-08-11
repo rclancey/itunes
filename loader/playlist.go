@@ -1,5 +1,9 @@
 package loader
 
+import (
+	"time"
+)
+
 type Playlist struct {
 	AllItems             *bool
 	Audiobooks           *bool
@@ -20,6 +24,8 @@ type Playlist struct {
 	TVShows              *bool
 	TrackIDs             []uint64
 	Visible              *bool
+	DateAdded            *time.Time
+	DateModified         *time.Time
 }
 
 func NewPlaylist() *Playlist {

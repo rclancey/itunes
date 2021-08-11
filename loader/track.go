@@ -66,6 +66,7 @@ type Track struct {
 	SortComposer         *string
 	SortName             *string
 	SortSeries           *string
+	StartTime            *int
 	StopTime             *int
 	TVShow               *bool
 	TotalTime            *uint
