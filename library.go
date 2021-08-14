@@ -33,10 +33,11 @@ func NewLibrary() *Library {
 }
 
 func (lib *Library) Load(fn string) error {
-	l := loader.NewLoader()
-	go l.Load(fn)
+	l := NewLoader(fn)
+	go l.LoadFile(fn)
 	for {
-		update, ok := <-l.C
+		ch := l.GetChan()
+		update, ok := <-ch
 		if !ok {
 			return nil
 		}
