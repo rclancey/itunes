@@ -336,30 +336,30 @@ type Database struct {
 }
 
 type DatabaseInner struct {
-	Type ObjectSignature
-	Size uint32
-	A [4]byte
-	B [4]byte
-	StrLen uint8
-	ApplicationVersion ApplicationVersion `json:",string"`
-	E [4]byte
-	PersistentID PersistentID `json:",string"`
-	G [4]byte
-	H uint8
-	MajorVersion uint8
-	J uint8
-	MinorVersion uint8
-	L uint32
-	M [4]byte
-	N [4]byte
-	O uint16
-	P uint16
-	Q [4]byte
+	Type ObjectSignature // 0
+	Size uint32 // 4
+	A [4]byte // 8
+	B [4]byte // 12
+	StrLen uint8 // 16
+	ApplicationVersion ApplicationVersion `json:",string"` // 17
+	E [4]byte // 48
+	PersistentID PersistentID `json:",string"` // 52
+	G [4]byte  // 60
+	H uint8 // 64
+	MajorVersion uint8 // 65
+	J uint8 // 66
+	MinorVersion uint8 // 67
+	L uint32 // 68
+	M [4]byte // 72
+	N [4]byte // 76
+	O uint16 // 80
+	P uint16 // 82
+	Q [4]byte // 84
 	//DatabaseDate Time `json:",string"`
-	R uint32
-	MaxCryptSize uint32
-	T uint32
-	TZOffset int32
+	R uint32 // 88
+	MaxCryptSize uint32 // 92
+	T uint32 // 96
+	TZOffset int32 // 100
 }
 
 func (o *Database) Read() error {
@@ -709,6 +709,8 @@ func (o *Track) Read() error {
 	o.Parsed = &TrackInner{}
 	err := o.StandardObject.Parse(o.Parsed)
 	if err != nil {
+		expSize := binary.Size(o.Parsed)
+		log.Printf("expected %d bytes for track, but only %d available", expSize, o.StandardObject.Size)
 		return err
 	}
 	o.RecordCount = int(o.Parsed.RecordCount)
@@ -741,63 +743,74 @@ func (o *Track) Read() error {
 	o.AlbumSequence = int(o.Parsed.AlbumSequence)
 	o.BackupDate = o.Parsed.BackupDate.Time()
 	o.SampleCount = int(o.Parsed.SampleCount)
-	o.SkipCount = int(o.Parsed.SkipCount)
-	o.SkipDate = o.Parsed.SkipDate.Time()
+	if len(o.StandardObject.Data) >= 288 {
+		buf := bytes.NewBuffer(o.StandardObject.Data[280:])
+		var count uint32
+		var t Time
+		err := binary.Read(buf, o.StandardObject.ByteOrder, &count)
+		if err == nil {
+			o.SkipCount = int(count)
+		}
+		err = binary.Read(buf, o.StandardObject.ByteOrder, &t)
+		if err == nil {
+			o.SkipDate = t.Time()
+		}
+	}
 	return nil
 }
 
 
 type TrackInner struct {
-	Type ObjectSignature
-	Size uint32
-	SubBytes uint32
-	RecordCount uint32
-	TrackID uint32
-	BlockType uint32
-	Unknown1 uint32
-	FileType [4]byte
-	DateModified Time
-	FileSize uint32
-	TotalTime uint32
-	TrackNumber uint32
-	TrackCount uint32
-	Unknown2 uint16
-	Year uint16
-	Unknown3 uint16
-	BitRate uint16
-	SampleRate uint16
-	Unknown4 uint16
-	VolumeAdjustment int32
-	StartTime uint32
-	StopTime uint32
-	PlayCount uint32
-	Unknown5 uint16
-	Compilation uint16
-	Unknown6 [12]byte
-	Unknown7 uint32
-	PlayDate Time
-	DiscNumber uint16
-	DiscCount uint16
-	Rating uint8
-	BPM uint8
-	Unknown8 [10]byte
-	DateAdded Time
-	Disabled uint32
-	PersistentID PersistentID
-	Unknown9 uint32
-	FileType2 [4]byte
-	Unknown10 [3]uint32
-	PurchaseDate Time
-	ReleaseDate Time // 39
-	Unknown11 [13]uint32
-	Protected uint32
-	AlbumSequence uint32
-	BackupDate Time
-	Unknown12 [5]uint32
-	SampleCount uint32
-	Unknown13 [7]uint32
-	SkipCount uint32
-	SkipDate Time
+	Type ObjectSignature      // 0
+	Size uint32               // 4
+	SubBytes uint32           // 8
+	RecordCount uint32        // 12
+	TrackID uint32            // 16
+	BlockType uint32          // 20
+	Unknown1 uint32           // 24
+	FileType [4]byte          // 28
+	DateModified Time         // 32
+	FileSize uint32           // 36
+	TotalTime uint32          // 40
+	TrackNumber uint32        // 44
+	TrackCount uint32         // 48
+	Unknown2 uint16           // 52
+	Year uint16               // 54
+	Unknown3 uint16           // 56
+	BitRate uint16            // 58
+	SampleRate uint16         // 60
+	Unknown4 uint16           // 62
+	VolumeAdjustment int32    // 64
+	StartTime uint32          // 68
+	StopTime uint32           // 72
+	PlayCount uint32          // 76
+	Unknown5 uint16           // 80
+	Compilation uint16        // 82
+	Unknown6 [12]byte         // 84
+	Unknown7 uint32           // 96
+	PlayDate Time             // 100
+	DiscNumber uint16         // 104
+	DiscCount uint16          // 106
+	Rating uint8              // 108
+	BPM uint8                 // 109
+	Unknown8 [10]byte         // 110
+	DateAdded Time            // 120
+	Disabled uint32           // 124
+	PersistentID PersistentID // 128
+	Unknown9 uint32           // 136
+	FileType2 [4]byte         // 140
+	Unknown10 [3]uint32       // 144
+	PurchaseDate Time         // 156
+	ReleaseDate Time // 39    // 160
+	Unknown11 [13]uint32      // 164
+	Protected uint32          // 216
+	AlbumSequence uint32      // 220
+	BackupDate Time           // 224
+	Unknown12 [5]uint32       // 228
+	SampleCount uint32        // 248
+	//Unknown13 [7]uint32       // 252
+	//SkipCount uint32          // 280
+	//SkipDate Time             // 284
 	//Remainder [420]byte
 }
 
@@ -852,13 +865,27 @@ func (o *Playlist) Read() error {
 	o.Parsed = &PlaylistInner{}
 	err := o.StandardObject.Parse(o.Parsed)
 	if err != nil {
+		expSize := binary.Size(o.Parsed)
+		log.Printf("expected %d bytes for playlist, but only %d available", expSize, o.StandardObject.Size)
+		/*
+		if errors.Is(err, io.ErrUnexpectedEOF) {
+			return nil
+		}
+		*/
 		return err
 	}
 	o.RecordCount = int(o.Parsed.RecordCount)
 	o.TrackCount = int(o.Parsed.TrackCount)
 	o.SortOrderFieldType = o.Parsed.SortOrderFieldType
 	o.DateAdded = o.Parsed.DateAdded.Time()
-	o.DateModified = o.Parsed.DateModified.Time()
+	if len(o.StandardObject.Data) >= 632 {
+		buf := bytes.NewBuffer(o.StandardObject.Data[628:632])
+		var t Time
+		err := binary.Read(buf, o.StandardObject.ByteOrder, &t)
+		if err == nil {
+			o.DateModified = t.Time()
+		}
+	}
 	o.PersistentID = o.Parsed.PersistentID
 	o.ParentPersistentID = o.Parsed.ParentPersistentID
 	data := o.StandardObject.Data[8:]
@@ -903,8 +930,8 @@ type PlaylistInner struct {
 	ParentPersistentID PersistentID          // 528
 	Unknown11 [7]uint32 `json:",omitempty"`  // 536
 	PersistentID2 PersistentID               // 564
-	Unknown12 [14]uint32 `json:",omitempty"` // 572
-	DateModified Time                        // 628
+	//Unknown12 [14]uint32 `json:",omitempty"` // 572
+	//DateModified Time                        // 628
 }
 
 // hptm
