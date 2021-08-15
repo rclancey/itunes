@@ -13,6 +13,7 @@ import (
 
 type Loader struct {
 	*loader.BaseLoader
+	header *Database
 	offset int
 	trackIdMap map[int]uint64
 }
@@ -20,7 +21,7 @@ type Loader struct {
 var zeroTime = time.Unix(0, 0)
 
 func NewLoader() *Loader {
-	return &Loader{loader.NewBaseLoader(), 0, nil}
+	return &Loader{loader.NewBaseLoader(), nil, 0, nil}
 }
 
 func (l *Loader) LoadFile(fn string) {
@@ -41,17 +42,22 @@ func (l *Loader) Decrypt(f io.ReadCloser) (io.ReadCloser, error) {
 	if !isa {
 		return nil, errors.WithStack(ErrInvalidHeader)
 	}
+	l.header = db
+	/*
 	major, err := db.ApplicationVersion.Major()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	*/
 	var cryptSize int
-	if major < 9 {
+	if db.MajorVersion == 1 && db.MinorVersion == 0 {
 		cryptSize = -2
-	} else if major < 11 {
+	} else if db.MajorVersion == 1 && db.MinorVersion == 1 {
 		cryptSize = -1
-	} else {
+	} else if db.MajorVersion == 2 {
 		cryptSize = 102400
+	} else {
+		return nil, errors.Wrapf(ErrUnknownVersion, "%d.%d", db.MajorVersion, db.MinorVersion)
 	}
 	if db.MaxCryptSize != 0 {
 		cryptSize = db.MaxCryptSize
@@ -64,6 +70,10 @@ func (l *Loader) Decrypt(f io.ReadCloser) (io.ReadCloser, error) {
 }
 
 func (l *Loader) Parse(f io.Reader) {
+	ch := l.GetChan()
+	if ch != nil {
+		ch <- l.header
+	}
 	for {
 		n, obj, err := ReadObject(f, l.offset)
 		l.offset += n
