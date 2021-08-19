@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type SortablePlaylistList []*Playlist
@@ -27,13 +29,13 @@ func (spl SortablePlaylistList) Less(i, j int) bool {
 }
 
 type Playlist struct {
-	PersistentID         PersistentID   `json:"persistent_id,omitempty"`
-	ParentPersistentID   *PersistentID  `json:"parent_persistent_id,omitempty"`
+	PersistentID         pid.PersistentID   `json:"persistent_id,omitempty"`
+	ParentPersistentID   *pid.PersistentID  `json:"parent_persistent_id,omitempty"`
 	Folder               bool           `json:"folder,omitempty"`
 	Name                 string         `json:"name,omitempty"`
 	Smart                *SmartPlaylist `json:"smart,omitempty"`
-	GeniusTrackID        *PersistentID  `json:"genius_track_id,omitempty"`
-	TrackIDs             []PersistentID `json:"track_ids"`
+	GeniusTrackID        *pid.PersistentID  `json:"genius_track_id,omitempty"`
+	TrackIDs             []pid.PersistentID `json:"track_ids"`
 	Children             []*Playlist    `json:"children,omitempty"`
 	PlaylistItems        []*Track       `json:"items,omitempty"`
 	SortField            string         `json:"sort_field,omitempty"`
@@ -103,7 +105,7 @@ func (p *Playlist) Unnest(lib *Library) {
 	}
 }
 
-func (p *Playlist) Move(lib *Library, parentId *PersistentID) error {
+func (p *Playlist) Move(lib *Library, parentId *pid.PersistentID) error {
 	if p.ParentPersistentID == nil && parentId == nil {
 		return nil
 	}
@@ -120,7 +122,7 @@ func (p *Playlist) Dedup() {
 	if p.Folder || p.GeniusTrackID != nil || p.Smart != nil {
 		return
 	}
-	seen := map[PersistentID]bool{}
+	seen := map[pid.PersistentID]bool{}
 	for _, id := range p.TrackIDs {
 		if _, ok := seen[id]; ok {
 			seen[id] = true
@@ -128,9 +130,9 @@ func (p *Playlist) Dedup() {
 			seen[id] = false
 		}
 	}
-	ids := make([]PersistentID, len(seen))
+	ids := make([]pid.PersistentID, len(seen))
 	i := 0
-	seen = map[PersistentID]bool{}
+	seen = map[pid.PersistentID]bool{}
 	for _, id := range p.TrackIDs {
 		if _, ok := seen[id]; !ok {
 			ids[i] = id
@@ -238,7 +240,7 @@ func (p *Playlist) Priority() int {
 	return 200
 }
 
-func (p *Playlist) Update(orig, cur *Playlist) (*PersistentID, bool) {
+func (p *Playlist) Update(orig, cur *Playlist) (*pid.PersistentID, bool) {
 	if p.Folder != cur.Folder {
 		return nil, false
 	}

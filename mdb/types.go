@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Sized interface {
@@ -58,17 +58,6 @@ func (t Time) String() string {
 
 func (t Time) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.String())
-}
-
-type PersistentID uint64
-
-func (id PersistentID) String() string {
-	v := strings.ToUpper(strconv.FormatUint(uint64(id), 16))
-	return strings.Repeat("0", 16 - len(v)) + v
-}
-
-func (id PersistentID) MarshalJSON() ([]byte, error) {
-	return json.Marshal(id.String())
 }
 
 type StandardObject struct {
@@ -196,7 +185,7 @@ func (o *StandardObject) GetData() []byte {
 type Envelope struct {
 	*StandardObject
 	Parsed *EnvelopeInner
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	ApplicationVersion ApplicationVersion
 	MajorVersion int
 	MinorVersion int
@@ -230,7 +219,7 @@ type EnvelopeInner struct {
 	MajorVersion uint16
 	MinorVersion uint16
 	ApplicationVersion ApplicationVersion
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	FileTypeID uint32
 	Unknown1 [2]uint32
 	ItemCount uint32
@@ -239,10 +228,10 @@ type EnvelopeInner struct {
 	ArtistCount uint32
 	MaxCryptSize uint32
 	TZOffset int32
-	AppleStoreID PersistentID
+	AppleStoreID pid.PersistentID
 	LibraryDate Time
 	Unknown3 uint32
-	ITunesLibraryPersistentID PersistentID
+	ITunesLibraryPersistentID pid.PersistentID
 }
 
 type SectionBoundary struct {
@@ -273,7 +262,7 @@ type SectionBoundaryInner struct {
 type LibraryMaster struct {
 	*StandardObject
 	Parsed *LibraryMasterInner
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	DataObjectCount int
 }
 
@@ -294,9 +283,9 @@ type LibraryMasterInner struct {
 	DataObjectCount uint32
 	Unknown1 [11]uint32
 	Unknown2 uint16
-	LibraryPersistentID PersistentID
+	LibraryPersistentID pid.PersistentID
 	Unknown3 [5]uint32
-	LibraryPersistentID2 PersistentID
+	LibraryPersistentID2 pid.PersistentID
 }
 
 type AlbumList struct {
@@ -325,8 +314,9 @@ type AlbumListInner struct {
 type Album struct {
 	*StandardObject
 	Parsed *AlbumInner
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	DataObjectCount int
+	AlbumRating uint8
 }
 
 func (o *Album) Read() error {
@@ -337,6 +327,7 @@ func (o *Album) Read() error {
 	}
 	o.PersistentID = o.Parsed.PersistentID
 	o.DataObjectCount = int(o.Parsed.DataObjectCount)
+	o.AlbumRating = o.Parsed.AlbumRating
 	return nil
 }
 
@@ -345,7 +336,14 @@ type AlbumInner struct {
 	Size uint32
 	SectionsLength uint32
 	DataObjectCount uint32
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
+	Unknown1 [2]uint32
+	Unknown2 pid.PersistentID
+	AlbumRating uint8
+	Unknown3 uint8
+	Unknown4 uint16
+	Unknown5 [5]uint32
+	Unknown6 pid.PersistentID
 }
 
 type ArtistList struct {
@@ -373,7 +371,7 @@ type ArtistListInner struct {
 type Artist struct {
 	*StandardObject
 	Parsed *ArtistInner
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	DataObjectCount int
 }
 
@@ -393,7 +391,7 @@ type ArtistInner struct {
 	Size uint32
 	SectionsLength uint32
 	DataObjectCount uint32
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 }
 
 type TrackList struct {
@@ -421,7 +419,7 @@ type TrackListInner struct {
 type Track struct {
 	*StandardObject
 	Parsed *TrackInner
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	DataObjectCount int
 	Disabled bool
 	Love bool
@@ -433,8 +431,8 @@ type Track struct {
 	DiscCount int
 	DiscNumber int
 	Year int
-	AlbumID PersistentID
-	ArtistID PersistentID
+	AlbumID pid.PersistentID
+	ArtistID pid.PersistentID
 }
 
 func (o *Track) Read() error {
@@ -465,7 +463,7 @@ type TrackInner struct {
 	Size uint32                 // 4
 	Unknown1 uint32             // 8
 	DataObjectCount uint32      // 12
-	PersistentID PersistentID   // 16
+	PersistentID pid.PersistentID   // 16
 	Unknown2 [4]uint32          // 24
 	Unknown3 uint16             // 40
 	Disabled uint16             // 42
@@ -491,10 +489,10 @@ type TrackInner struct {
 	Unknown15 uint32            // 166
 	Year uint16                 // 170
 	Unknown16 uint16            // 172
-	AlbumID PersistentID        // 174
-	ArtistID PersistentID       // 182
+	AlbumID pid.PersistentID        // 174
+	ArtistID pid.PersistentID       // 182
 	Unknown17 [21]uint32        // 190
-	PersistentID2 PersistentID  // 274
+	PersistentID2 pid.PersistentID  // 274
 }
 
 type PlaylistList struct {
@@ -522,8 +520,8 @@ type PlaylistListInner struct {
 type Playlist struct {
 	*StandardObject
 	Parsed *PlaylistInner
-	PersistentID PersistentID
-	ParentPersistentID PersistentID
+	PersistentID pid.PersistentID
+	ParentPersistentID pid.PersistentID
 	DataObjectCount int
 	TrackCount int
 	DateAdded time.Time
@@ -559,11 +557,11 @@ type PlaylistInner struct {
 	DateAdded Time                   // 22
 	Unknown2 uint16                  // 26
 	Unknown3 uint16                  // 28
-	PersistentID PersistentID        // 30
+	PersistentID pid.PersistentID        // 30
 	Unknown4 [2]uint32               // 38
 	Unknown5 [3]byte                 // 46
 	Folder uint8                     // 49
-	ParentPersistentID PersistentID  // 50
+	ParentPersistentID pid.PersistentID  // 50
 	Unknown6 [5]uint32               // 58
 	Unknown7 byte                    // 78
 	PlaylistKind uint8               // 79

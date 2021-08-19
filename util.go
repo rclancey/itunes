@@ -6,9 +6,11 @@ import (
 	"strings"
 	"strconv"
 	"time"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
-var pidType = reflect.TypeOf(PersistentID(0))
+var pidType = reflect.TypeOf(pid.PersistentID(0))
 
 func SetField(s interface{}, key[]byte, kind string, val []byte) bool {
 	k := strings.Replace(string(key), " ", "", -1)

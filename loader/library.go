@@ -2,6 +2,8 @@ package loader
 
 import (
 	"time"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Library struct {
@@ -12,7 +14,7 @@ type Library struct {
 	Date *time.Time
 	Features *int
 	ShowContentRatings *bool
-	PersistentID *uint64 `plist:"Library Persistent ID"`
+	PersistentID *pid.PersistentID `plist:"Library Persistent ID"`
 	MusicFolder *string
 	Tracks *int
 	Playlists *int
@@ -67,7 +69,7 @@ func (lib *Library) GetShowContentRatings() bool {
 	return *lib.ShowContentRatings
 }
 
-func (lib *Library) GetPersistentID() uint64 {
+func (lib *Library) GetPersistentID() pid.PersistentID {
 	if lib.PersistentID == nil {
 		return 0
 	}

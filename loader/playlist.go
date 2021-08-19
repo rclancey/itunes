@@ -2,6 +2,8 @@ package loader
 
 import (
 	"time"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Playlist struct {
@@ -9,20 +11,20 @@ type Playlist struct {
 	Audiobooks           *bool
 	DistinguishedKind    *int
 	Folder               *bool
-	GeniusTrackID        *uint64
+	GeniusTrackID        *pid.PersistentID
 	Master               *bool
 	Movies               *bool
 	Music                *bool
 	Name                 *string
-	ParentPersistentID   *uint64
+	ParentPersistentID   *pid.PersistentID
 	PlaylistID           *int
-	PersistentID         *uint64 `plist:"Playlist Persistent ID"`
+	PersistentID         *pid.PersistentID `plist:"Playlist Persistent ID"`
 	Podcasts             *bool
 	PurchasedMusic       *bool
 	SmartCriteria        []byte
 	SmartInfo            []byte
 	TVShows              *bool
-	TrackIDs             []uint64
+	TrackIDs             []pid.PersistentID
 	Visible              *bool
 	DateAdded            *time.Time
 	DateModified         *time.Time
@@ -30,7 +32,7 @@ type Playlist struct {
 
 func NewPlaylist() *Playlist {
 	p := &Playlist{}
-	p.TrackIDs = make([]uint64, 0)
+	p.TrackIDs = make([]pid.PersistentID, 0)
 	return p
 }
 
@@ -75,7 +77,7 @@ func (pl *Playlist) GetFolder() bool {
 	return *pl.Folder
 }
 
-func (pl *Playlist) GetGeniusTrackID() uint64 {
+func (pl *Playlist) GetGeniusTrackID() pid.PersistentID {
 	if pl.GeniusTrackID == nil {
 		return 0
 	}
@@ -110,7 +112,7 @@ func (pl *Playlist) GetName() string {
 	return *pl.Name
 }
 
-func (pl *Playlist) GetParentPersistentID() uint64 {
+func (pl *Playlist) GetParentPersistentID() pid.PersistentID {
 	if pl.ParentPersistentID == nil {
 		return 0
 	}
@@ -124,7 +126,7 @@ func (pl *Playlist) GetPlaylistID() int {
 	return *pl.PlaylistID
 }
 
-func (pl *Playlist) GetPersistentID() uint64 {
+func (pl *Playlist) GetPersistentID() pid.PersistentID {
 	if pl.PersistentID == nil {
 		return 0
 	}

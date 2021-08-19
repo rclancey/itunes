@@ -4,19 +4,22 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/rclancey/itunes/binary"
 	"github.com/rclancey/itunes/loader"
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Loader struct {
 	*loader.BaseLoader
 	offset int
+	albumRatings map[pid.PersistentID]uint8
 }
 
 func NewLoader() *Loader {
-	return &Loader{loader.NewBaseLoader(), 0}
+	return &Loader{loader.NewBaseLoader(), 0, map[pid.PersistentID]uint8{}}
 }
 
 func (l *Loader) LoadFile(fn string) {
@@ -110,7 +113,7 @@ func (l *Loader) getNext(payload io.Reader) (interface{}, error) {
 			Date: nil,
 			Features: nil,
 			ShowContentRatings: nil,
-			PersistentID: loader.Uint64p(uint64(xobj.PersistentID)),
+			PersistentID: xobj.PersistentID.Pointer(),
 			MusicFolder: nil,
 			Tracks: loader.Intp(int(xobj.ItemCount)),
 			Playlists: loader.Intp(int(xobj.PlaylistCount)),
@@ -133,6 +136,8 @@ func (l *Loader) getNext(payload io.Reader) (interface{}, error) {
 			}
 		}
 		return lib, nil
+	case *Album:
+		l.albumRatings[xobj.PersistentID] = xobj.AlbumRating
 	case *Track:
 		return l.getTrack(xobj, payload)
 	case *Playlist:
@@ -143,7 +148,7 @@ func (l *Loader) getNext(payload io.Reader) (interface{}, error) {
 
 func (l *Loader) getTrack(t *Track, payload io.Reader) (*loader.Track, error) {
 	track := &loader.Track{
-		PersistentID: loader.Uint64p(uint64(t.PersistentID)),
+		PersistentID: t.PersistentID.Pointer(),
 		Rating: loader.Uint8p(uint8(t.Stars)),
 	}
 	if t.Love {
@@ -220,6 +225,7 @@ func (l *Loader) getTrack(t *Track, payload io.Reader) (*loader.Track, error) {
 			track.FileFolderCount = loader.Intp(int(v.FileFolderCount))
 			track.LibraryFolderCount = loader.Intp(int(v.LibraryFolderCount))
 			track.BitRate = loader.Uintp(uint(v.BitRate))
+			track.SampleRate = loader.Uintp(uint(v.SampleRate))
 			track.DateAdded = loader.Timep(v.DateAdded.Time())
 			if v.DateModified != 0 {
 				track.DateModified = loader.Timep(v.DateModified.Time())
@@ -240,10 +246,16 @@ func (l *Loader) getTrack(t *Track, payload io.Reader) (*loader.Track, error) {
 			// noop
 		case "Location":
 			track.Location = loader.Stringp(dobj.WideCharData.StrData)
+			if strings.HasPrefix(dobj.WideCharData.StrData, "file://") {
+				track.TrackType = loader.Stringp("File")
+			} else {
+				track.TrackType = loader.Stringp("URL")
+			}
 		case "Timestamps":
 			v := dobj.TimestampsData
 			if v.PlayDate != 0 {
 				track.PlayDate = loader.Timep(v.PlayDate.Time())
+				track.PlayDateGarbage = loader.Intp(int(v.PlayDate))
 			}
 			if v.PlayCount != 0 {
 				track.PlayCount = loader.Uintp(uint(v.PlayCount))
@@ -256,20 +268,25 @@ func (l *Loader) getTrack(t *Track, payload io.Reader) (*loader.Track, error) {
 			}
 		}
 	}
+	albumRating := l.albumRatings[t.AlbumID]
+	if albumRating != 0 {
+		track.AlbumRating = loader.Uint8p(albumRating)
+		track.AlbumRatingComputed = loader.Boolp(true)
+	}
 	return track, nil
 }
 
 func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, error) {
 	pl := &loader.Playlist{
-		PersistentID: loader.Uint64p(uint64(p.PersistentID)),
+		PersistentID: p.PersistentID.Pointer(),
 		DateAdded: loader.Timep(p.DateAdded),
 		DateModified: loader.Timep(p.DateModified),
-		TrackIDs: []uint64{},
+		TrackIDs: []pid.PersistentID{},
 		AllItems: loader.Boolp(true),
 		Visible: loader.Boolp(true),
 	}
 	if p.ParentPersistentID != 0 {
-		pl.ParentPersistentID = loader.Uint64p(uint64(p.ParentPersistentID))
+		pl.ParentPersistentID = p.ParentPersistentID.Pointer()
 	}
 	if p.Folder {
 		pl.Folder = loader.Boolp(true)
@@ -295,9 +312,9 @@ func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, 
 		case "SmartInfo":
 			pl.SmartInfo = dobj.Raw
 		case "GeniusInfo":
-			pl.GeniusTrackID = loader.Uint64p(uint64(dobj.GeniusInfoData.GeniusTrackID))
+			pl.GeniusTrackID = dobj.GeniusInfoData.GeniusTrackID.Pointer()
 		case "PlaylistItem":
-			pl.TrackIDs = append(pl.TrackIDs, uint64(dobj.PlaylistItemData.TrackID))
+			pl.TrackIDs = append(pl.TrackIDs, dobj.PlaylistItemData.TrackID)
 		}
 	}
 	return pl, nil
