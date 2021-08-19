@@ -15,6 +15,8 @@ import (
 
 	"github.com/pkg/errors"
 	"golang.org/x/text/encoding/htmlindex"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Sized interface {
@@ -81,17 +83,6 @@ func (t Time) String() string {
 
 func (t Time) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.Time())
-}
-
-type PersistentID uint64
-
-func (id PersistentID) String() string {
-	v := strings.ToUpper(strconv.FormatUint(uint64(id), 16))
-	return strings.Repeat("0", 16 - len(v)) + v
-}
-
-func (id PersistentID) MarshalJSON() ([]byte, error) {
-	return json.Marshal(id.String())
 }
 
 type DataType uint32
@@ -327,7 +318,7 @@ func (o *StandardObject) GetData() []byte {
 type Database struct {
 	*StandardObject
 	Parsed *DatabaseInner
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	ApplicationVersion ApplicationVersion
 	MajorVersion int
 	MinorVersion int
@@ -343,7 +334,7 @@ type DatabaseInner struct {
 	StrLen uint8 // 16
 	ApplicationVersion ApplicationVersion `json:",string"` // 17
 	E [4]byte // 48
-	PersistentID PersistentID `json:",string"` // 52
+	PersistentID pid.PersistentID `json:",string"` // 52
 	G [4]byte  // 60
 	H uint8 // 64
 	MajorVersion uint8 // 65
@@ -560,8 +551,8 @@ type Album struct {
 	Parsed *AlbumInner
 	RecordCount int
 	Sequence int
-	AlbumID PersistentID
-	ArtistID PersistentID
+	AlbumID pid.PersistentID
+	ArtistID pid.PersistentID
 	AlbumRating int
 }
 
@@ -585,9 +576,9 @@ type AlbumInner struct {
 	SubBytes uint32
 	RecordCount uint32
 	Sequence uint32
-	AlbumID PersistentID `json:",string"`
+	AlbumID pid.PersistentID `json:",string"`
 	Unknown1 [4]byte
-	ArtistID PersistentID `json:",string"`
+	ArtistID pid.PersistentID `json:",string"`
 	Unknown2 uint16
 	AlbumRating int8
 }
@@ -621,7 +612,7 @@ type Artist struct {
 	Parsed *ArtistInner
 	RecordCount int
 	Sequence int
-	ArtistID PersistentID
+	ArtistID pid.PersistentID
 }
 
 func (o *Artist) Read() error {
@@ -641,7 +632,7 @@ type ArtistInner struct {
 	SubBytes uint32
 	RecordCount uint32
 	Sequence uint32
-	ArtistID PersistentID `json:",string"`
+	ArtistID pid.PersistentID `json:",string"`
 }
 
 // htlm
@@ -695,7 +686,7 @@ type Track struct {
 	BPM int
 	DateAdded time.Time
 	Disabled bool
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	PurchaseDate time.Time
 	ReleaseDate time.Time
 	AlbumSequence int
@@ -796,7 +787,7 @@ type TrackInner struct {
 	Unknown8 [10]byte         // 110
 	DateAdded Time            // 120
 	Disabled uint32           // 124
-	PersistentID PersistentID // 128
+	PersistentID pid.PersistentID // 128
 	Unknown9 uint32           // 136
 	FileType2 [4]byte         // 140
 	Unknown10 [3]uint32       // 144
@@ -846,8 +837,8 @@ type Playlist struct {
 	SortOrderFieldType SortField
 	DateAdded time.Time
 	DateModified time.Time
-	PersistentID PersistentID
-	ParentPersistentID PersistentID
+	PersistentID pid.PersistentID
+	ParentPersistentID pid.PersistentID
 	Folder bool
 	GeniusTrackID int
 
@@ -922,14 +913,14 @@ type PlaylistInner struct {
 	Unknown5 [65]uint32 `json:",omitempty"`  // 176
 	Unknown6 uint16 `json:",omitempty"`      // 436
 	Unknown7 uint16 `json:",omitempty"`      // 438
-	PersistentID PersistentID                // 440
+	PersistentID pid.PersistentID                // 440
 	Unknown8 [18]uint32 `json:",omitempty"`  // 448
 	Unknown9 uint16 `json:",omitempty"`      // 520
 	Folder uint16                            // 522
 	Unknown10 uint32 `json:",omitempty"`     // 524
-	ParentPersistentID PersistentID          // 528
+	ParentPersistentID pid.PersistentID          // 528
 	Unknown11 [7]uint32 `json:",omitempty"`  // 536
-	PersistentID2 PersistentID               // 564
+	PersistentID2 pid.PersistentID               // 564
 	//Unknown12 [14]uint32 `json:",omitempty"` // 572
 	//DateModified Time                        // 628
 }

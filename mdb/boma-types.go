@@ -10,24 +10,28 @@ import (
 	"unicode/utf8"
 
 	"github.com/pkg/errors"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type NumericDataObject struct {
-	Unknown1 [18]uint32
+	Unknown1 [16]uint32
+	SampleRate float32
+	Unknown2 uint32
 	FileType uint32
 	FileFolderCount int16
 	LibraryFolderCount int16
-	Unknown2 [3]uint32
+	Unknown3 [3]uint32
 	BitRate uint32
 	DateAdded Time
-	Unknown3 [8]uint32
+	Unknown4 [8]uint32
 	DateModified Time
 	Normalization uint32
 	DatePurchased Time
 	ReleaseDate Time
-	Unknown4 [3]uint32
+	Unknown5 [3]uint32
 	Duration uint32
-	Unknown5 [34]uint32
+	Unknown6 [34]uint32
 	FileSize uint32
 }
 
@@ -50,7 +54,7 @@ func (o *TimestampsDataObject) Read(r io.Reader) error {
 
 type GeniusInfoDataObject struct {
 	Unknown1 uint32
-	GeniusTrackID PersistentID
+	GeniusTrackID pid.PersistentID
 }
 
 func (o *GeniusInfoDataObject) Read(r io.Reader) error {
@@ -246,10 +250,10 @@ type PlaylistItemDataObject struct {
 	SubSectionStart uint32
 	SectionLength uint32
 	Unknown2 uint32
-	IpfaID PersistentID
-	TrackID PersistentID
+	IpfaID pid.PersistentID
+	TrackID pid.PersistentID
 	Unknown3 [4]uint32
-	IpfaID2 PersistentID
+	IpfaID2 pid.PersistentID
 }
 
 func (o *PlaylistItemDataObject) Read(r io.Reader) error {

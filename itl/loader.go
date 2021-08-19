@@ -9,13 +9,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rclancey/itunes/binary"
 	"github.com/rclancey/itunes/loader"
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Loader struct {
 	*loader.BaseLoader
 	header *Database
 	offset int
-	trackIdMap map[int]uint64
+	trackIdMap map[int]pid.PersistentID
 }
 
 var zeroTime = time.Unix(0, 0)
@@ -97,7 +98,7 @@ func (l *Loader) Load(f io.ReadCloser) {
 		l.Shutdown(errors.WithStack(err))
 		return
 	}
-	l.trackIdMap = map[int]uint64{}
+	l.trackIdMap = map[int]pid.PersistentID{}
 	for {
 		obj, err := l.getNext(payload)
 		ch := l.GetChan()
@@ -140,7 +141,7 @@ func (l *Loader) getNext(payload io.Reader) (interface{}, error) {
 			Date: nil,
 			Features: nil,
 			ShowContentRatings: nil,
-			PersistentID: loader.Uint64p(uint64(xobj.PersistentID)),
+			PersistentID: xobj.PersistentID.Pointer(),
 			MusicFolder: nil,
 		}
 		return lib, nil
@@ -161,7 +162,7 @@ func (l *Loader) getTrack(t *Track, payload io.Reader) (*loader.Track, error) {
 		BitRate: loader.Uintp(uint(t.BitRate)),
 		SampleRate: loader.Uintp(uint(t.SampleRate)),
 		DateAdded: loader.Timep(t.DateAdded),
-		PersistentID: loader.Uint64p(uint64(t.PersistentID)),
+		PersistentID: t.PersistentID.Pointer(),
 	}
 	if t.TrackNumber != 0 {
 		track.TrackNumber = loader.Uint8p(uint8(t.TrackNumber))
@@ -297,16 +298,16 @@ func (l *Loader) getTrack(t *Track, payload io.Reader) (*loader.Track, error) {
 
 func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, error) {
 	pl := &loader.Playlist{
-		PersistentID: loader.Uint64p(uint64(p.PersistentID)),
+		PersistentID: p.PersistentID.Pointer(),
 		Name: loader.Stringp(""),
 		DateAdded: loader.Timep(p.DateAdded),
 		DateModified: loader.Timep(p.DateModified),
-		TrackIDs: []uint64{},
+		TrackIDs: []pid.PersistentID{},
 		AllItems: loader.Boolp(true),
 		Visible: loader.Boolp(true),
 	}
 	if p.ParentPersistentID != 0 {
-		pl.ParentPersistentID = loader.Uint64p(uint64(p.ParentPersistentID))
+		pl.ParentPersistentID = p.ParentPersistentID.Pointer()
 	}
 	if p.Folder {
 		pl.Folder = loader.Boolp(true)
@@ -332,7 +333,7 @@ func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, 
 		case "Smart Info":
 			pl.SmartInfo = dobj.Data
 		//case "GeniusInfo":
-		//	pl.GeniusTrackID = loader.Uint64p(uint64(dobj.GeniusInfoData.GeniusTrackID))
+		//	pl.GeniusTrackID = dobj.GeniusInfoData.GeniusTrackID.Pointer()
 		}
 	}
 	i := 0

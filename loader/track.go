@@ -2,6 +2,8 @@ package loader
 
 import (
 	"time"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Track struct {
@@ -43,7 +45,7 @@ type Track struct {
 	MusicVideo           *bool
 	Name                 *string
 	PartOfGaplessAlbum   *bool
-	PersistentID         *uint64
+	PersistentID         *pid.PersistentID
 	PlayCount            *uint
 	PlayDateGarbage      *int `plist:"Play Date"`
 	PlayDate             *time.Time `plist:"Play Date UTC"`
@@ -351,7 +353,7 @@ func (tr *Track) GetPartOfGaplessAlbum() bool {
 	return *tr.PartOfGaplessAlbum
 }
 
-func (tr *Track) GetPersistentID() uint64 {
+func (tr *Track) GetPersistentID() pid.PersistentID {
 	if tr.PersistentID == nil {
 		return 0
 	}

@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type TrackList []*Track
@@ -196,10 +198,10 @@ func (tl *TrackList) SortBy(key string, desc bool) error {
 				return fmt.Errorf("can't sort by %s: no such field or method", key)
 			}
 		}
-		if f.Type == reflect.TypeOf(PersistentID(0)) {
+		if f.Type == reflect.TypeOf(pid.PersistentID(0)) {
 			stl.less = func(a, b *Track) bool {
-				av := reflect.ValueOf(*a).FieldByIndex(f.Index).Interface().(PersistentID)
-				bv := reflect.ValueOf(*b).FieldByIndex(f.Index).Interface().(PersistentID)
+				av := reflect.ValueOf(*a).FieldByIndex(f.Index).Interface().(pid.PersistentID)
+				bv := reflect.ValueOf(*b).FieldByIndex(f.Index).Interface().(pid.PersistentID)
 				if desc {
 					return uint64(bv) < uint64(av)
 				}

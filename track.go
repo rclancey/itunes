@@ -10,10 +10,11 @@ import (
 	"time"
 
 	"github.com/dhowden/tag"
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Track struct {
-	PersistentID         PersistentID `json:"persistent_id"`
+	PersistentID         pid.PersistentID `json:"persistent_id"`
 	Album                string       `json:"album,omitempty"`
 	AlbumArtist          string       `json:"album_artist,omitempty"`
 	AlbumRating          uint8        `json:"album_rating,omitempty"`

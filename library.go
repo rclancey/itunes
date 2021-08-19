@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/rclancey/itunes/loader"
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Library struct {
@@ -17,17 +18,17 @@ type Library struct {
 	Date Time
 	Features int
 	ShowContentRatings bool
-	PersistentID PersistentID
+	PersistentID pid.PersistentID
 	MusicFolder string
 	Tracks []*Track
-	Playlists map[PersistentID]*Playlist
+	Playlists map[pid.PersistentID]*Playlist
 	PlaylistTree []*Playlist
 }
 
 func NewLibrary() *Library {
 	lib := &Library{}
 	lib.Tracks = make([]*Track, 0)
-	lib.Playlists = map[PersistentID]*Playlist{}
+	lib.Playlists = map[pid.PersistentID]*Playlist{}
 	lib.PlaylistTree = []*Playlist{}
 	return lib
 }
@@ -50,7 +51,7 @@ func (lib *Library) Load(fn string) error {
 			lib.Date = Time{tupdate.GetDate()}
 			lib.Features = tupdate.GetFeatures()
 			lib.ShowContentRatings = tupdate.GetShowContentRatings()
-			lib.PersistentID = PersistentID(tupdate.GetPersistentID())
+			lib.PersistentID = pid.PersistentID(tupdate.GetPersistentID())
 			lib.MusicFolder = tupdate.GetMusicFolder()
 		case *loader.Track:
 			if tupdate.GetMusicVideo() {
@@ -73,7 +74,7 @@ func (lib *Library) Load(fn string) error {
 				continue
 			}
 			tr := &Track{
-				PersistentID:       PersistentID(tupdate.GetPersistentID()),
+				PersistentID:       pid.PersistentID(tupdate.GetPersistentID()),
 				Album:              tupdate.GetAlbum(),
 				AlbumArtist:        tupdate.GetAlbumArtist(),
 				AlbumRating:        tupdate.GetAlbumRating(),
@@ -145,25 +146,25 @@ func (lib *Library) Load(fn string) error {
 				continue
 			}
 			pl := &Playlist{
-				PersistentID: PersistentID(tupdate.GetPersistentID()),
+				PersistentID: pid.PersistentID(tupdate.GetPersistentID()),
 				Folder: tupdate.GetFolder(),
 				Name: tupdate.GetName(),
 			}
 			if tupdate.ParentPersistentID != nil {
-				pid := PersistentID(*tupdate.ParentPersistentID)
+				pid := pid.PersistentID(*tupdate.ParentPersistentID)
 				pl.ParentPersistentID = &pid
 			}
 			if tupdate.GeniusTrackID != nil {
-				pid := PersistentID(*tupdate.GeniusTrackID)
+				pid := pid.PersistentID(*tupdate.GeniusTrackID)
 				pl.GeniusTrackID = &pid
 			}
 			if tupdate.IsSmart() {
 				pl.Smart, _ = ParseSmartPlaylist(tupdate.SmartInfo, tupdate.SmartCriteria)
 			}
 			if !pl.Folder && pl.Smart == nil {
-				pl.TrackIDs = make([]PersistentID, len(tupdate.TrackIDs))
+				pl.TrackIDs = make([]pid.PersistentID, len(tupdate.TrackIDs))
 				for i, id := range tupdate.TrackIDs {
-					pl.TrackIDs[i] = PersistentID(id)
+					pl.TrackIDs[i] = pid.PersistentID(id)
 				}
 			}
 			if pl.Folder {
@@ -203,12 +204,12 @@ func (lib *Library) GetPlaylistByPath(path string) *Playlist {
 	return nil
 }
 
-func (lib *Library) CreatePlaylist(name string, parentId *PersistentID) *Playlist {
+func (lib *Library) CreatePlaylist(name string, parentId *pid.PersistentID) *Playlist {
 	p := &Playlist{
-		PersistentID: PersistentID(rand.Uint64()),
+		PersistentID: pid.PersistentID(rand.Uint64()),
 		ParentPersistentID: parentId,
 		Name: name,
-		TrackIDs: []PersistentID{},
+		TrackIDs: []pid.PersistentID{},
 	}
 	lib.Playlists[p.PersistentID] = p
 	p.Nest(lib)
@@ -258,7 +259,7 @@ func (lib *Library) AddTrack(tr *Track) {
 	*/
 }
 
-func (lib *Library) RemoveTrack(id PersistentID) {
+func (lib *Library) RemoveTrack(id pid.PersistentID) {
 	f := func(i int) bool {
 		return lib.Tracks[i].PersistentID >= id
 	}
@@ -280,7 +281,7 @@ func (lib *Library) RemoveTrack(id PersistentID) {
 			}
 		}
 		if found > 0 {
-			ids := make([]PersistentID, len(pl.TrackIDs) - found)
+			ids := make([]pid.PersistentID, len(pl.TrackIDs) - found)
 			i := 0
 			for _, tid := range pl.TrackIDs {
 				if tid != id {
@@ -293,7 +294,7 @@ func (lib *Library) RemoveTrack(id PersistentID) {
 	}
 }
 
-func (lib *Library) GetTrack(id PersistentID) *Track {
+func (lib *Library) GetTrack(id pid.PersistentID) *Track {
 	f := func(i int) bool {
 		return lib.Tracks[i].PersistentID >= id
 	}
@@ -352,7 +353,7 @@ func (l *Library) RenestPlaylists() {
 	sort.Sort(spls(l.PlaylistTree))
 }
 
-func (l *Library) MovePlaylist(p *Playlist, parentId *PersistentID) error {
+func (l *Library) MovePlaylist(p *Playlist, parentId *pid.PersistentID) error {
 	if p.ParentPersistentID == nil && parentId == nil {
 		return nil
 	}

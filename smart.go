@@ -14,6 +14,8 @@ import (
 	"time"
 	"unicode/utf16"
 	"unicode/utf8"
+
+	"github.com/rclancey/itunes/persistentId"
 )
 
 func debugStruct(name string, obj interface{}) {
@@ -871,8 +873,8 @@ func (r *SmartPlaylistDateRule) basicMatch(v time.Time) bool {
 type SmartPlaylistPlaylistRule struct {
 	*SmartPlaylistCommonRule
 	RuleType string `json:"type"`
-	Value PersistentID `json:"value"`
-	tracks map[PersistentID]bool
+	Value pid.PersistentID `json:"value"`
+	tracks map[pid.PersistentID]bool
 }
 
 func NewSmartPlaylistPlaylistRule(ruleHeader *RuleHeader, value []byte) *SmartPlaylistPlaylistRule {
@@ -882,7 +884,7 @@ func NewSmartPlaylistPlaylistRule(ruleHeader *RuleHeader, value []byte) *SmartPl
 	return &SmartPlaylistPlaylistRule{
 		SmartPlaylistCommonRule: NewSmartPlaylistCommonRule(ruleHeader, value),
 		RuleType: "playlist",
-		Value: PersistentID(id),
+		Value: pid.PersistentID(id),
 		tracks: nil,
 	}
 }
@@ -899,7 +901,7 @@ func (r *SmartPlaylistPlaylistRule) Encode() ([]byte, error) {
 func (r *SmartPlaylistPlaylistRule) Match(track *Track, lib *Library) bool {
 	if r.tracks == nil {
 		pl := lib.Playlists[r.Value]
-		r.tracks = map[PersistentID]bool{}
+		r.tracks = map[pid.PersistentID]bool{}
 		if pl != nil {
 			for _, tr := range pl.Populate(lib).PlaylistItems {
 				r.tracks[tr.PersistentID] = true

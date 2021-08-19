@@ -11,17 +11,18 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rclancey/itunes/loader"
+	"github.com/rclancey/itunes/persistentId"
 )
 
 type Loader struct {
 	*loader.BaseLoader
-	trackIDMap map[int]uint64
+	trackIDMap map[int]pid.PersistentID
 }
 
 func NewLoader() *Loader {
 	return &Loader{
 		loader.NewBaseLoader(),
-		map[int]uint64{},
+		map[int]pid.PersistentID{},
 	}
 }
 
@@ -48,7 +49,7 @@ func (l *Loader) Load(f io.ReadCloser) {
 	default:
 		ch <- lib
 	}
-	l.trackIDMap = map[int]uint64{}
+	l.trackIDMap = map[int]pid.PersistentID{}
 	dec := xml.NewDecoder(f)
 	err := l.parseLibrary(lib, dec)
 	if err != nil {
