@@ -9,6 +9,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -87,6 +88,7 @@ SELECT db.ZDBID,
   LEFT JOIN ZCACHEITEM c ON src.ZIMAGEINFO = c.ZIMAGEINFO
  WHERE db.ZDBID = ?
    AND db.ZPERSISTENTID = ?`
+	log.Println(qs, db.libid.Int64(), id.Int64())
 	rows, err := db.db.Queryx(qs, db.libid, id)
 	if err != nil {
 		return nil, err
