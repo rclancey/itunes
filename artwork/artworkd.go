@@ -68,25 +68,24 @@ type ArtworkItem struct {
 	Height float64 `db:"ZHEIGHT"`
 	Format Format `db:"ZFORMAT"`
 	Kind int `db:"ZKIND"`
+	URL string `db:"ZURL"`
 }
 
 func (db *ArtworkDB) GetArtworkItem(id pid.PersistentID) (*ArtworkItem, error) {
 	qs := `
 SELECT db.ZDBID,
        db.ZPERSISTENTID,
+       src.ZURL,
        img.ZHASHSTRING,
+       img.ZKIND,
        c.ZWIDTH,
        c.ZHEIGHT,
-       c.ZFORMAT,
-       img.ZKIND
-  FROM ZDATABASEITEMINFO db,
-       ZSOURCEINFO src,
-       ZIMAGEINFO img,
-       ZCACHEITEM c
- WHERE db.ZSOURCEINFO = src.Z_PK
-   AND src.ZIMAGEINFO = img.Z_PK
-   AND c.ZIMAGEINFO = img.Z_PK
-   AND db.ZDBID = ?
+       c.ZFORMAT
+  FROM ZDATABASEITEMINFO db
+  LEFT JOIN ZSOURCEINFO src ON db.ZSOURCEINFO = src.Z_PK
+  LEFT JOIN ZIMAGEINFO img ON src.ZIMAGEINFO = img.Z_PK
+  LEFT JOIN ZCACHEITEM c ON src.ZIMAGEINFO = c.ZIMAGEINFO
+ WHERE db.ZDBID = ?
    AND db.ZPERSISTENTID = ?`
 	rows, err := db.db.Queryx(qs, db.libid, id)
 	if err != nil {
@@ -124,6 +123,14 @@ func (db *ArtworkDB) GetArtworkFile(id pid.PersistentID) (string, error) {
 		return "", err
 	}
 	return fn, nil
+}
+
+func (db *ArtworkDB) GetArtworkURL(id pid.PersistentID) (string, error) {
+	item, err := db.GetArtworkItem(id)
+	if err != nil {
+		return "", err
+	}
+	return item.URL, nil
 }
 
 func (db *ArtworkDB) GetJPEG(id pid.PersistentID) ([]byte, error) {
