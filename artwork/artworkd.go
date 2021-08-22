@@ -69,7 +69,7 @@ type ArtworkItem struct {
 	Height float64 `db:"ZHEIGHT"`
 	Format Format `db:"ZFORMAT"`
 	Kind int `db:"ZKIND"`
-	URL string `db:"ZURL"`
+	URL *string `db:"ZURL"`
 }
 
 func (db *ArtworkDB) GetArtworkItem(id pid.PersistentID) (*ArtworkItem, error) {
@@ -132,7 +132,10 @@ func (db *ArtworkDB) GetArtworkURL(id pid.PersistentID) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return item.URL, nil
+	if item.URL == nil {
+		return "", nil
+	}
+	return *item.URL, nil
 }
 
 func (db *ArtworkDB) GetJPEG(id pid.PersistentID) ([]byte, error) {
