@@ -170,3 +170,7 @@ func (db *ArtworkDB) GetJPEG(id pid.PersistentID) ([]byte, error) {
 	}
 	return nil, errors.New("unknown image format")
 }
+
+func (db *ArtworkDB) Close() error {
+	return db.db.Close()
+}
