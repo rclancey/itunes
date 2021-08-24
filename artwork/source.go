@@ -13,6 +13,7 @@ import (
 
 type ArtworkSource interface {
 	GetJPEG(id pid.PersistentID) ([]byte, error)
+	Close() error
 }
 
 func NewArtworkSource(homedir string, libid pid.PersistentID) (ArtworkSource, error) {
@@ -91,4 +92,8 @@ func (src *ItunesSource) GetJPEG(id pid.PersistentID) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func (src *ItunesSource) Close() error {
+	return nil
 }

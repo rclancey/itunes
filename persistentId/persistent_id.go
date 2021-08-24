@@ -49,11 +49,12 @@ func (pid *PersistentID) UnmarshalJSON(data []byte) error {
 }
 
 func (pid PersistentID) Int64() int64 {
-	iv := int64(pid & 0x7fffffffffffffff)
 	if pid > 0x7fffffffffffffff {
-		iv *= -1
+		u2 := uint64(pid) & 0x7fffffffffffffff
+		u3 := 0x8000000000000000 - u2
+		return int64(u3) * -1
 	}
-	return iv
+	return int64(pid)
 }
 
 func (pid PersistentID) Value() (driver.Value, error) {
@@ -68,7 +69,9 @@ func (pid *PersistentID) Scan(value interface{}) error {
 	switch v := value.(type) {
 	case int64:
 		if v < 0 {
-			*pid = PersistentID(uint64(-1 * v) | 0x8000000000000000)
+			u3 := uint64(v * -1)
+			u2 := 0x8000000000000000 - u3
+			*pid = PersistentID(u2 | 0x8000000000000000)
 			return nil
 		}
 		*pid = PersistentID(uint64(v))

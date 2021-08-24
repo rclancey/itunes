@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"log"
+	//"log"
 	"reflect"
 	"regexp"
 	"sort"
@@ -134,12 +134,12 @@ func (tl *TrackList) DefaultSort() *TrackList {
 }
 
 func (tl *TrackList) SortBy(key string, desc bool) error {
-	log.Println("hello?")
+	//log.Println("hello?")
 	rt := reflect.TypeOf(&Track{})
 	meth, ok := rt.MethodByName(key)
 	stl := &SortableTrackList{tl: *tl}
 	if ok {
-		log.Println("trying to sort with method")
+		//log.Println("trying to sort with method")
 		f := meth.Func
 		if f.Type().NumIn() != 1 {
 			return fmt.Errorf("can't sort by %s: method requires arguments", key)
@@ -148,7 +148,7 @@ func (tl *TrackList) SortBy(key string, desc bool) error {
 			return fmt.Errorf("can't sort by %s: method has no output", key)
 		}
 		if f.Type().Out(0).Kind() == reflect.String {
-			log.Println("sorting by string method")
+			//log.Println("sorting by string method")
 			stl.less = func(a, b *Track) bool {
 				av := f.Call([]reflect.Value{reflect.ValueOf(a)})[0]
 				bv := f.Call([]reflect.Value{reflect.ValueOf(b)})[0]
@@ -158,7 +158,7 @@ func (tl *TrackList) SortBy(key string, desc bool) error {
 				return av.String() < bv.String()
 			}
 		} else if f.Type().Out(0) == reflect.TypeOf(time.Time{}) {
-			log.Println("sorting by built-in time method")
+			//log.Println("sorting by built-in time method")
 			stl.less = func(a, b *Track) bool {
 				av := f.Call([]reflect.Value{reflect.ValueOf(a)})[0].Interface().(time.Time)
 				bv := f.Call([]reflect.Value{reflect.ValueOf(b)})[0].Interface().(time.Time)
@@ -168,7 +168,7 @@ func (tl *TrackList) SortBy(key string, desc bool) error {
 				return av.Before(bv)
 			}
 		} else if f.Type().Out(0) == reflect.TypeOf(&Time{}) {
-			log.Println("sorting by wrapper time method")
+			//log.Println("sorting by wrapper time method")
 			stl.less = func(a, b *Track) bool {
 				av := f.Call([]reflect.Value{reflect.ValueOf(a)})[0].Interface().(*Time)
 				bv := f.Call([]reflect.Value{reflect.ValueOf(b)})[0].Interface().(*Time)
@@ -182,7 +182,7 @@ func (tl *TrackList) SortBy(key string, desc bool) error {
 		}
 	} else {
 		rt = rt.Elem()
-		log.Println("trying to sort by field")
+		//log.Println("trying to sort by field")
 		f, ok := rt.FieldByName(key)
 		if !ok {
 			n := rt.NumField()
@@ -304,9 +304,9 @@ func (tl *TrackList) SortBy(key string, desc bool) error {
 				return fmt.Errorf("can't sort by %s: don't know how to compare %s", key, f.Type.Name())
 			}
 		}
-		log.Println("sorting tracks by field")
+		//log.Println("sorting tracks by field")
 	}
-	log.Println("sorting tracks")
+	//log.Println("sorting tracks")
 	sort.Sort(stl)
 	return nil
 }
@@ -446,7 +446,7 @@ func (tl *TrackList) Filter(genre, artist, album string) *TrackList {
 	out := &TrackList{}
 	if album != "" {
 		key := MakeKey(album)
-		log.Printf("filtering %d tracks by album %s (%s)", len(*tl), album, key)
+		//log.Printf("filtering %d tracks by album %s (%s)", len(*tl), album, key)
 		for _, tr := range *tl {
 			if tl.compare(key, tr.SortAlbum, tr.Album) {
 				out.Add(tr)
@@ -456,7 +456,7 @@ func (tl *TrackList) Filter(genre, artist, album string) *TrackList {
 	}
 	if artist != "" {
 		key := MakeKey(artist)
-		log.Printf("filtering %d tracks by artist %s (%s)", len(*tl), artist, key)
+		//log.Printf("filtering %d tracks by artist %s (%s)", len(*tl), artist, key)
 		for _, tr := range *tl {
 			if tl.compare(key, tr.SortAlbumArtist, tr.AlbumArtist) {
 				out.Add(tr)
@@ -468,7 +468,7 @@ func (tl *TrackList) Filter(genre, artist, album string) *TrackList {
 	}
 	if genre != "" {
 		key := MakeKey(genre)
-		log.Printf("filtering %d tracks by genre %s (%s)", len(*tl), genre, key)
+		//log.Printf("filtering %d tracks by genre %s (%s)", len(*tl), genre, key)
 		for _, tr := range *tl {
 			if tl.compare(key, tr.Genre) {
 				out.Add(tr)

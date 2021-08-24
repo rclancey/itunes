@@ -9,7 +9,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
-	"log"
+	//"log"
 )
 
 const (
@@ -41,7 +41,7 @@ func (itc *ITC) Read() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("read header: %#v", *header)
+	//log.Printf("read header: %#v", *header)
 	switch string(header.Kind[:]) {
 	case "itch":
 		return NewITCH(itc, header)
@@ -117,7 +117,7 @@ func NewItem(itc *ITC, header *FrameHeader) (*Item, error) {
 	} else {
 		preamble = make([]byte, 16)
 	}
-	log.Printf("offset = %d, preamble = %d bytes", offset, len(preamble))
+	//log.Printf("offset = %d, preamble = %d bytes", offset, len(preamble))
 	_, err = io.ReadFull(itc.r, preamble)
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func NewItem(itc *ITC, header *FrameHeader) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("item info = %#v", info)
+	//log.Println("item info = %#v", info)
 	bytesRead += binary.Size(&info)
 	item.LibraryID = info.LibraryID
 	item.TrackID = info.TrackID
