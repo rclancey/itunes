@@ -1,8 +1,11 @@
 package mdb
 
 import (
+	"encoding/base64"
+	xbin "encoding/binary"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -308,13 +311,33 @@ func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, 
 		case "PlaylistName":
 			pl.Name = loader.Stringp(dobj.WideCharData.StrData)
 		case "SmartCriteria":
-			pl.SmartCriteria = dobj.Raw
+			pl.SmartCriteria = dobj.Raw[4:]
 		case "SmartInfo":
-			pl.SmartInfo = dobj.Raw
+			pl.SmartInfo = dobj.Raw[4:]
 		case "GeniusInfo":
 			pl.GeniusTrackID = dobj.GeniusInfoData.GeniusTrackID.Pointer()
 		case "PlaylistItem":
 			pl.TrackIDs = append(pl.TrackIDs, dobj.PlaylistItemData.TrackID)
+		}
+	}
+	if pl.Folder != nil && *pl.Folder {
+		pl.SmartCriteria = nil
+		pl.SmartInfo = nil
+		pl.TrackIDs = []pid.PersistentID{}
+	}
+	if pl.SmartCriteria != nil && pl.SmartInfo != nil {
+		info := base64.StdEncoding.EncodeToString(pl.SmartInfo)
+		crit := base64.StdEncoding.EncodeToString(pl.SmartCriteria)
+		var err error
+		pl.Smart, err = loader.ParseSmartPlaylist([]byte(info), []byte(crit), xbin.LittleEndian)
+		if err != nil {
+			log.Printf("%s %+v", *pl.Name, err)
+		}
+		if pl.GeniusTrackID == nil && pl.Smart != nil && len(pl.Smart.Criteria.Rules) == 0 {
+			pl.GeniusTrackID = pl.TrackIDs[0].Pointer()
+			pl.Smart = nil
+			pl.SmartCriteria = nil
+			pl.SmartInfo = nil
 		}
 	}
 	return pl, nil
