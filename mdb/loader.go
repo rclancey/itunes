@@ -329,7 +329,7 @@ func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, 
 		info := base64.StdEncoding.EncodeToString(pl.SmartInfo)
 		crit := base64.StdEncoding.EncodeToString(pl.SmartCriteria)
 		var err error
-		pl.Smart, err = loader.ParseSmartPlaylist([]byte(info), []byte(crit), xbin.LittleEndian)
+		pl.Smart, err = loader.ParseSmartPlaylist([]byte(info), []byte(crit), xbin.BigEndian)
 		if err != nil {
 			log.Printf("%s %+v", *pl.Name, err)
 		}
