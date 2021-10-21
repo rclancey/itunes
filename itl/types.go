@@ -442,16 +442,28 @@ type DataObjectInner struct {
 
 func (o *DataObject) Read() error {
 	r := o.Buffer()
+	order := o.ByteOrder
 	inner := &DataObjectInner{}
-	err := binary.Read(r, o.ByteOrder, inner)
+	err := binary.Read(r, order, inner)
 	if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
 		return errors.WithStack(err)
+	}
+	if inner.TypeID == 101 || inner.TypeID == 102 {
+		r = o.Buffer()
+		io.ReadFull(r, make([]byte, 24))
+		inner.DataSize = inner.Size - 24
+		order = binary.BigEndian
 	}
 	o.Parsed = inner
 	o.TypeID = inner.TypeID
 
 	//xsize := inner.Size - (inner.Unknown1 + 8)
+	/*
 	if o.Parsed.Unknown4 & 256 != 0 || inner.DataSize > inner.Size {
+		return nil
+	}
+	*/
+	if inner.DataSize > inner.Size {
 		return nil
 	}
 	/*
@@ -474,6 +486,9 @@ func (o *DataObject) Read() error {
 		//return errors.WithStack(ErrTooBig)
 	}
 	*/
+	if o.TypeID == 66 {
+		inner.DataSize -= 16
+	}
 	data := make([]byte, int(inner.DataSize))
 	n, err := io.ReadFull(r, data)
 	if err != nil {

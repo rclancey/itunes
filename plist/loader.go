@@ -1,8 +1,10 @@
 package plist
 
 import (
+	"encoding/binary"
 	"encoding/xml"
 	"io"
+	"log"
 	"os"
 	"reflect"
 	"strconv"
@@ -157,16 +159,34 @@ func (l *Loader) parseLibrary(lib *loader.Library, dec *xml.Decoder) error {
 				}
 			} else if tagStackSize == 3 && tagStack[0] == "plist" && tagStack[1] ==  "dict" && tagStack[2] == "array" && tagStack[3] == "dict" {
 				if keyStackSize >= 1 && keyStack[0] == "Playlists" {
-					playlist := &loader.Playlist{}
-					err := l.parsePlaylist(playlist, dec)
+					pl := &loader.Playlist{}
+					err := l.parsePlaylist(pl, dec)
 					if err != nil {
 						return errors.Wrap(err, "can't parse playlist")
+					}
+					if pl.Folder != nil && *pl.Folder {
+						pl.SmartCriteria = nil
+						pl.SmartInfo = nil
+						pl.TrackIDs = []pid.PersistentID{}
+					}
+					if pl.SmartInfo != nil || pl.SmartCriteria != nil {
+						var err error
+						pl.Smart, err = loader.ParseSmartPlaylist([]byte(pl.SmartInfo), []byte(pl.SmartCriteria), binary.BigEndian)
+						if err != nil {
+							log.Printf("%s %+v", *pl.Name, err)
+						}
+						if pl.GeniusTrackID == nil && pl.Smart != nil && len(pl.Smart.Criteria.Rules) == 0 {
+							pl.GeniusTrackID = pl.TrackIDs[0].Pointer()
+							pl.Smart = nil
+							pl.SmartCriteria = nil
+							pl.SmartInfo = nil
+						}
 					}
 					select {
 					case <-quitCh:
 						return errors.WithStack(loader.AbortError)
 					default:
-						ch <- playlist
+						ch <- pl
 					}
 					playlistCount += 1
 					keyStackSize--

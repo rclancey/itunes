@@ -28,6 +28,7 @@ type Playlist struct {
 	Visible              *bool
 	DateAdded            *time.Time
 	DateModified         *time.Time
+	Smart                *SmartPlaylist
 }
 
 func NewPlaylist() *Playlist {

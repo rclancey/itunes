@@ -86,8 +86,8 @@ var bomaTypes = map[uint32]bomaType{
 
 	0x24: bomaType{0x24, BomaTypeVideoInfo, "VideoInfo"},
 
-	0xc9: bomaType{0xc9, BomaTypeUnknown, "SmartInfo"},
-	0xca: bomaType{0xca, BomaTypeUnknown, "SmartCriteria"},
+	0xca: bomaType{0xca, BomaTypeUnknown, "SmartInfo"},
+	0xc9: bomaType{0xc9, BomaTypeUnknown, "SmartCriteria"},
 	0x1f6: bomaType{0x1f6, BomaTypeUnknown, "Unmapped0x1f6"},
 
 }
