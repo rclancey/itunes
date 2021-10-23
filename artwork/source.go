@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -21,8 +22,10 @@ func NewArtworkSource(homedir string, libid pid.PersistentID) (ArtworkSource, er
 	var err error
 	src, err = NewArtworkDB(homedir, libid)
 	if err == nil {
+		log.Println("got artworkdb")
 		return src, nil
 	}
+	log.Println("no artwork db:", err)
 	return NewItunesSource(homedir, libid)
 }
 
