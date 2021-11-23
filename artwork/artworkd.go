@@ -9,6 +9,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,10 +39,12 @@ func NewArtworkDB(homedir string, libid pid.PersistentID) (*ArtworkDB, error) {
 	fn := filepath.Join(root, "artworkd.sqlite")
 	_, err := os.Stat(fn)
 	if err != nil {
+		log.Println("artwork db not found", err)
 		return nil, err
 	}
 	db, err := sqlx.Connect("sqlite3", fn)
 	if err != nil {
+		log.Println("error connecting to artwork db", err)
 		return nil, err
 	}
 	return &ArtworkDB{
