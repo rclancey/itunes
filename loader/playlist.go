@@ -24,11 +24,12 @@ type Playlist struct {
 	SmartCriteria        []byte
 	SmartInfo            []byte
 	TVShows              *bool
-	TrackIDs             []pid.PersistentID
 	Visible              *bool
 	DateAdded            *time.Time
 	DateModified         *time.Time
 	Smart                *SmartPlaylist
+	SortField            *string
+	TrackIDs             []pid.PersistentID
 }
 
 func NewPlaylist() *Playlist {

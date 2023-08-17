@@ -117,7 +117,7 @@ func (b BomaSubType) MarshalJSON() ([]byte, error) {
 //var UTF16_TYPES = map[uint32]bool{}
 //var DATA_TYPE = map[uint32]string{}
 //var DATASET_TYPE = map[uint32]string{}
-//var SORT_FIELD_TYPE = map[uint32]string{}
+var SORT_FIELD_TYPE = map[uint32]string{}
 //var COLUMN_TYPE = map[uint32]string{}
 var PLAYLIST_KIND_TYPE = map[uint32]string{}
 //var SPECIAL_SMART_TYPE = map[uint32]string{}
@@ -138,12 +138,12 @@ func init() {
 	// 31=iTunes U,
 	// 32=Genius Mix,
 	// 35=Genius Mixes
-	PLAYLIST_KIND_TYPE[2] = "Movies"
-	PLAYLIST_KIND_TYPE[3] = "TV Shows"
-	PLAYLIST_KIND_TYPE[4] = "Music"
-	PLAYLIST_KIND_TYPE[5] = "Books"
-	PLAYLIST_KIND_TYPE[6] = "Tones"
-	PLAYLIST_KIND_TYPE[7] = "Rentals"
+	PLAYLIST_KIND_TYPE[2]  = "Movies"
+	PLAYLIST_KIND_TYPE[3]  = "TV Shows"
+	PLAYLIST_KIND_TYPE[4]  = "Music"
+	PLAYLIST_KIND_TYPE[5]  = "Books"
+	PLAYLIST_KIND_TYPE[6]  = "Tones"
+	PLAYLIST_KIND_TYPE[7]  = "Rentals"
 	PLAYLIST_KIND_TYPE[10] = "Podcasts"
 	PLAYLIST_KIND_TYPE[19] = "Purchased"
 	PLAYLIST_KIND_TYPE[22] = "iTunes DJ"
@@ -154,6 +154,46 @@ func init() {
 	PLAYLIST_KIND_TYPE[47] = "Music Videos"
 	PLAYLIST_KIND_TYPE[48] = "Home Videos"
 	PLAYLIST_KIND_TYPE[65] = "Downloaded"
+
+	SORT_FIELD_TYPE[1]   = "Playlist Order"
+	SORT_FIELD_TYPE[5]   = "Name"
+	SORT_FIELD_TYPE[6]   = "Album"
+	SORT_FIELD_TYPE[7]   = "Artist"
+	SORT_FIELD_TYPE[8]   = "Bit Rate"
+	SORT_FIELD_TYPE[9]   = "Genre"
+	SORT_FIELD_TYPE[10]  = "Kind"
+	SORT_FIELD_TYPE[11]  = "Date Modified"
+	SORT_FIELD_TYPE[12]  = "Track Number"
+	SORT_FIELD_TYPE[13]  = "Release Date"
+	SORT_FIELD_TYPE[13]  = "Size"
+	SORT_FIELD_TYPE[14]  = "Total Time"
+	SORT_FIELD_TYPE[15]  = "Year"
+	SORT_FIELD_TYPE[16]  = "Sample Rate"
+	SORT_FIELD_TYPE[17]  = "Category"
+	SORT_FIELD_TYPE[20]  = "Comments"
+	SORT_FIELD_TYPE[21]  = "Date Added"
+	SORT_FIELD_TYPE[23]  = "Composer"
+	SORT_FIELD_TYPE[25]  = "Play Count"
+	SORT_FIELD_TYPE[26]  = "Play Date"
+	SORT_FIELD_TYPE[27]  = "Disc Number"
+	SORT_FIELD_TYPE[28]  = "Rating"
+	SORT_FIELD_TYPE[32]  = "Movement Number"
+	SORT_FIELD_TYPE[32]  = "Media Kind"
+	SORT_FIELD_TYPE[33]  = "BPM"
+	SORT_FIELD_TYPE[35]  = "Grouping"
+	SORT_FIELD_TYPE[36]  = "Description"
+	SORT_FIELD_TYPE[38]  = "Series"
+	SORT_FIELD_TYPE[39]  = "Season"
+	SORT_FIELD_TYPE[42]  = "Skip Count"
+	SORT_FIELD_TYPE[43]  = "Skip Date"
+	SORT_FIELD_TYPE[44]  = "Album Artist"
+	SORT_FIELD_TYPE[47]  = "Album Rating"
+	SORT_FIELD_TYPE[48]  = "Rental"
+	SORT_FIELD_TYPE[116] = "Love"
+	SORT_FIELD_TYPE[118] = "Work"
+	SORT_FIELD_TYPE[119] = "Purchase Date"
+	SORT_FIELD_TYPE[120] = "Movement Name"
+
 }
 
 type PlaylistKind uint32
