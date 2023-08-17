@@ -553,7 +553,7 @@ type PlaylistInner struct {
 	SectionsLength uint32            // 8
 	DataObjectCount uint32           // 12
 	TrackCount uint32                // 16
-	Unknown1 uint16                  // 20
+	SortField uint16                 // 20
 	DateAdded Time                   // 22
 	Unknown2 uint16                  // 26
 	Unknown3 uint16                  // 28
@@ -563,7 +563,7 @@ type PlaylistInner struct {
 	Folder uint8                     // 49
 	ParentPersistentID pid.PersistentID  // 50
 	Unknown6 [5]uint32               // 58
-	Unknown7 byte                    // 78
+	SortDescending byte              // 78
 	PlaylistKind uint8               // 79
 	Unknown8 [2]byte                 // 80
 	Unknown9 [14]uint32              // 82

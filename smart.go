@@ -362,7 +362,7 @@ func (c *SmartPlaylistCriteria) Parse(raw []byte) error {
 		case LocationField:
 			rule = NewSmartPlaylistLocationRule(ruleHeader, data)
 		default:
-			return fmt.Errorf("unknown rule type: %d / %s / %s", ruleHeader.FieldId, ruleHeader.Field(), ruleHeader.Field().Type())
+			return fmt.Errorf("unknown rule type: %d / %s / %d", ruleHeader.FieldId, ruleHeader.Field(), ruleHeader.Field().Type())
 		}
 		//debugStruct("rule", rule)
 		//rhd, _ := json.Marshal(ruleHeader)

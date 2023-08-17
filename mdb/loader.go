@@ -297,6 +297,13 @@ func (l *Loader) getPlaylist(p *Playlist, payload io.Reader) (*loader.Playlist, 
 	if p.DistinguishedKind != 0 {
 		pl.DistinguishedKind = loader.Intp(int(p.DistinguishedKind))
 	}
+	sortField, ok := SORT_FIELD_TYPE[uint32(p.Parsed.SortField)]
+	if ok {
+		if p.Parsed.SortDescending != 0 {
+			sortField = "-"+sortField
+		}
+		pl.SortField = &sortField
+	}
 	for i := 0; i < int(p.DataObjectCount); i += 1 {
 		n, child, err := ReadObject(payload, l.offset)
 		l.offset += n
